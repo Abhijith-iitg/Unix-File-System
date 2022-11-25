@@ -88,43 +88,36 @@ void makeFile(){
 		s1+=filecontent[i];
 		if((i-1)%4==0){
 			string r1=(InodeChildNames.begin())->first;
-			stringstream ss;
-			ss<<r1;
-			string childFileName;
-			ss>>childFileName;
-			
-			
+			string childFileName=r1;
 			InodeChildNames.erase(InodeChildNames.begin()->first);
 			newInode.childfilenames.push_back(childFileName);
-			
 			count++;
-
 			if(count==64)
 			{
 				struct Inode temp;
+				int r=rand();
+				while(InodeId[r]!=0){
+					r=rand();
+				}
+				InodeId[r]=1;
+				temp.Id=r;
 				string r1=(InodeChildNames.begin())->first;
+				childFileName=r1;
 				InodeChildNames.erase(InodeChildNames.begin()->first);
-	           if(realInode.indirect.size()<3)
-	           {
+	            if(realInode.indirect.size()<3)
+	            {
 	           	       if(count1==0)
 	           	       {
 	           	       	  realInode=newInode;
 	           	       }
 	           	       else{
-	           	       //newInode=temp;
-	           	       //newInode.childfilenames.clear();
-                       		realInode.indirect.push_back(newInode);
-                       	
+	           	       		realInode.indirect.push_back(newInode);	
                        }
                        newInode=temp;
                        count1++;
-                       
-              
-                       //cout<<r<<"SIZE=  "<<realInode.indirect.size()<<endl;
 	           }
 	           count=0;
 			}
-			//InodeName[fileName]=newInode;
 			fstream file;
 			file.open(childFileName,ios::out);
 			file<<s1;
@@ -133,10 +126,8 @@ void makeFile(){
 	}
 	if(s1!=""){
 		string r1=(InodeChildNames.begin())->first;
-		stringstream ss;
-		ss<<r1;
 		string childFileName;
-	 	ss>>childFileName;
+	 	childFileName=r1;
 	    InodeChildNames.erase(InodeChildNames.begin()->first);
 		newInode.childfilenames.push_back(childFileName);
 		count++;
@@ -145,7 +136,6 @@ void makeFile(){
 		file<<s1;
 		s1="";
 	}
-	//Inodes.push_back(newInode);
 	if(count!=0){
 		struct Inode temp;
 		int r=rand();
@@ -154,6 +144,7 @@ void makeFile(){
 		    r=rand();
 	    }
 	    InodeId[r]=1;
+	    temp.Id=r;
 	    if(realInode.indirect.size()<3)
 	    {
 	        if(count1==0)
@@ -161,23 +152,14 @@ void makeFile(){
 	           	realInode=newInode;
 	        }
 	        else{
-	           	       //newInode=temp;
-	           	       //newInode.childfilenames.clear();
-            realInode.indirect.push_back(newInode);
-                       	
+	           realInode.indirect.push_back(newInode);               	
             }
             newInode=temp;
             count1++;
-                       
-              
-            //cout<<r<<"SIZE=  "<<realInode.indirect.size()<<endl;
 		}
 		count=0;
 	}
-	//if(realInode.indirect.size()>0)
 	global->files[fileName]=realInode;
-    
-	
 }
 
 //The below function will delete the required file.
@@ -188,19 +170,21 @@ void deleteFile(){
 		InodeId[global->files[fileName].Id]=0;
 		for(int i=0;i<(int)global->files[fileName].childfilenames.size();i++){
 			InodeChildNames[global->files[fileName].childfilenames[i]]=0;
+			string s2=global->files[fileName].childfilenames[i];
 			const char* s1=global->files[fileName].childfilenames[i].c_str();
-			//strcpy(s1,Inodes[k].childfilenames[i]);
+			//This is to physically delete the file
 			remove(s1);
-			InodeChildNames[s1]=1;
+			InodeChildNames[s2]=1;
 		}
 		for(int i=0;i<(int)global->files[fileName].indirect.size();i++){
 			InodeId[global->files[fileName].indirect[i].Id]=0;
 			for(int j=0;j<(int)global->files[fileName].indirect[i].childfilenames.size();j++){
 				InodeChildNames[global->files[fileName].indirect[i].childfilenames[j]]=0;
-				const char* s1=global->files[fileName].indirect[i].childfilenames[j].c_str();
-				//strcpy(s1,Inodes[k].childfilenames[i]);
+				string s2=global->files[fileName].indirect[i].childfilenames[j];
+				const char* s1=global->files[fileName].childfilenames[j].c_str();
+				//This is to physically delete the file
 				remove(s1);
-				InodeChildNames[s1]=1;
+				InodeChildNames[s2]=1;
 			}	
 		}
 		global->files.erase(fileName);
@@ -253,7 +237,6 @@ void printFile(){
 			file.getline(s1,sizeof(s1));
 			cout<<s1;
 			count++;
-			//cout<<count<<endl;
 		}
 		for(int i=0;i<indirectchilds;i++){
 			temp=real.indirect[i];
@@ -264,7 +247,6 @@ void printFile(){
 				file.getline(s1,sizeof(s1));
 				cout<<s1;
 				count++;
-				//cout<<count<<endl;
 			}
 		}
 		cout<<endl;	
@@ -397,7 +379,6 @@ void appendFile()
 		struct Inode realInode=temp;
 		struct Inode newInode;
 		if(count1==0){
-			//cout<<"dsfsdfdsfsd***********"<<endl;
 			newInode=realInode;
 		}
 		else{
@@ -408,12 +389,7 @@ void appendFile()
 			s1+=filecontent[i];
 			if((i-1)%4==0){
 				string r1=(InodeChildNames.begin())->first;
-				stringstream ss;
-				ss<<r1;
-				string childFileName;
-				ss>>childFileName;
-				
-				
+				string childFileName=r1;
 				InodeChildNames.erase(InodeChildNames.begin()->first);
 				newInode.childfilenames.push_back(childFileName);
 				
@@ -422,6 +398,12 @@ void appendFile()
 				if(count==64)
 				{
 					struct Inode temp1;
+					int r=rand();
+					while(InodeId[r]!=0){
+						r=rand();
+					}
+					InodeId[r]=1;
+					temp1.Id=r;
 					string r1=(InodeChildNames.begin())->first;
 					InodeChildNames.erase(InodeChildNames.begin()->first);
 		           if(realInode.indirect.size()<3)
@@ -446,10 +428,7 @@ void appendFile()
 		}
 		if(s1!=""){
 			string r1=(InodeChildNames.begin())->first;
-			stringstream ss;
-			ss<<r1;
-			string childFileName;
-		 	ss>>childFileName;
+			string childFileName=r1;
 		    InodeChildNames.erase(InodeChildNames.begin()->first);
 			newInode.childfilenames.push_back(childFileName);
 			count++;
@@ -461,6 +440,12 @@ void appendFile()
 		//Inodes.push_back(newInode);
 		if(count!=0){
 			struct Inode temp1;
+			int r=rand();
+			while(InodeId[r]!=0){
+				r=rand();
+			}
+			InodeId[r]=1;
+			temp1.Id=r;
 			string r1=(InodeChildNames.begin())->first;
 			InodeChildNames.erase(InodeChildNames.begin()->first);
 		    if(realInode.indirect.size()<3)
@@ -543,11 +528,13 @@ void readInode(fstream &file1,struct Inode &temp,bool f){
 	int Id;
 	file1>>Id;
 	temp.Id=Id;
+	InodeId[Id]=1;
 	int noOfChildFiles;
 	file1>>noOfChildFiles;
 	for(int i=0;i<noOfChildFiles;i++){
 		string t;
 		file1>>t;
+		InodeChildNames.erase(t);
 		temp.childfilenames.push_back(t);
 	}
 	int noOfIndirectInodes;
@@ -642,8 +629,7 @@ int main(){
 		else if(s[0]=='l' && s[1]=='s'){
 			listFiles();
 		}
-		else if(s[0]=='a' and s[1]=='p')
-		{
+		else if(s[0]=='a' and s[1]=='p'){
 			appendFile();
 		}
 		//To exit from the program
